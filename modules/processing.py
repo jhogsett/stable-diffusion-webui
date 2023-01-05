@@ -50,9 +50,9 @@ def apply_color_correction(correction, original_image):
         correction,
         channel_axis=2
     ), cv2.COLOR_LAB2RGB).astype("uint8"))
-    
+
     image = blendLayers(image, original_image, BlendType.LUMINOSITY)
-    
+
     return image
 
 
@@ -466,9 +466,15 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     try:
         for k, v in p.override_settings.items():
             setattr(opts, k, v)
-            if k == 'sd_hypernetwork': shared.reload_hypernetworks()  # make onchange call for changing hypernet
-            if k == 'sd_model_checkpoint': sd_models.reload_model_weights()  # make onchange call for changing SD model
-            if k == 'sd_vae': sd_vae.reload_vae_weights()  # make onchange call for changing VAE
+            if k == 'sd_hypernetwork':
+                shared.reload_hypernetworks()  # make onchange call for changing hypernet
+
+            if k == 'sd_model_checkpoint':
+                sd_models.reload_model_weights()  # make onchange call for changing SD model
+                p.sd_model = shared.sd_model
+
+            if k == 'sd_vae':
+                sd_vae.reload_vae_weights()  # make onchange call for changing VAE
 
         res = process_images_inner(p)
 
@@ -662,12 +668,17 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
 class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     sampler = None
 
-    def __init__(self, enable_hr: bool = False, denoising_strength: float = 0.75, firstphase_width: int = 0, firstphase_height: int = 0, hr_scale: float = 2.0, hr_upscaler: str = None, **kwargs):
+    def __init__(self, enable_hr: bool = False, denoising_strength: float = 0.75, firstphase_width: int = 0, firstphase_height: int = 0, hr_scale: float = 2.0, hr_upscaler: str = None, hr_second_pass_steps: int = 0, hr_resize_x: int = 0, hr_resize_y: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.enable_hr = enable_hr
         self.denoising_strength = denoising_strength
         self.hr_scale = hr_scale
         self.hr_upscaler = hr_upscaler
+        self.hr_second_pass_steps = hr_second_pass_steps
+        self.hr_resize_x = hr_resize_x
+        self.hr_resize_y = hr_resize_y
+        self.hr_upscale_to_x = hr_resize_x
+        self.hr_upscale_to_y = hr_resize_y
 
         if firstphase_width != 0 or firstphase_height != 0:
             print("firstphase_width/firstphase_height no longer supported; use hr_scale", file=sys.stderr)
@@ -675,14 +686,60 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
             self.width = firstphase_width
             self.height = firstphase_height
 
+        self.truncate_x = 0
+        self.truncate_y = 0
+
+
     def init(self, all_prompts, all_seeds, all_subseeds):
         if self.enable_hr:
-            if state.job_count == -1:
-                state.job_count = self.n_iter * 2
+            if self.hr_resize_x == 0 and self.hr_resize_y == 0:
+                self.extra_generation_params["Hires upscale"] = self.hr_scale
+                self.hr_upscale_to_x = int(self.width * self.hr_scale)
+                self.hr_upscale_to_y = int(self.height * self.hr_scale)
             else:
-                state.job_count = state.job_count * 2
+                self.extra_generation_params["Hires resize"] = f"{self.hr_resize_x}x{self.hr_resize_y}"
 
-            self.extra_generation_params["Hires upscale"] = self.hr_scale
+                if self.hr_resize_y == 0:
+                    self.hr_upscale_to_x = self.hr_resize_x
+                    self.hr_upscale_to_y = self.hr_resize_x * self.height // self.width
+                elif self.hr_resize_x == 0:
+                    self.hr_upscale_to_x = self.hr_resize_y * self.width // self.height
+                    self.hr_upscale_to_y = self.hr_resize_y
+                else:
+                    target_w = self.hr_resize_x
+                    target_h = self.hr_resize_y
+                    src_ratio = self.width / self.height
+                    dst_ratio = self.hr_resize_x / self.hr_resize_y
+
+                    if src_ratio < dst_ratio:
+                        self.hr_upscale_to_x = self.hr_resize_x
+                        self.hr_upscale_to_y = self.hr_resize_x * self.height // self.width
+                    else:
+                        self.hr_upscale_to_x = self.hr_resize_y * self.width // self.height
+                        self.hr_upscale_to_y = self.hr_resize_y
+
+                    self.truncate_x = (self.hr_upscale_to_x - target_w) // opt_f
+                    self.truncate_y = (self.hr_upscale_to_y - target_h) // opt_f
+
+            # special case: the user has chosen to do nothing
+            if self.hr_upscale_to_x == self.width and self.hr_upscale_to_y == self.height:
+                self.enable_hr = False
+                self.denoising_strength = None
+                self.extra_generation_params.pop("Hires upscale", None)
+                self.extra_generation_params.pop("Hires resize", None)
+                return
+
+            if not state.processing_has_refined_job_count:
+                if state.job_count == -1:
+                    state.job_count = self.n_iter
+
+                shared.total_tqdm.updateTotal((self.steps + (self.hr_second_pass_steps or self.steps)) * state.job_count)
+                state.job_count = state.job_count * 2
+                state.processing_has_refined_job_count = True
+
+            if self.hr_second_pass_steps:
+                self.extra_generation_params["Hires steps"] = self.hr_second_pass_steps
+
             if self.hr_upscaler is not None:
                 self.extra_generation_params["Hires upscaler"] = self.hr_upscaler
 
@@ -699,8 +756,8 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
         if not self.enable_hr:
             return samples
 
-        target_width = int(self.width * self.hr_scale)
-        target_height = int(self.height * self.hr_scale)
+        target_width = self.hr_upscale_to_x
+        target_height = self.hr_upscale_to_y
 
         def save_intermediate(image, index):
             """saves image before applying hires fix, if enabled in options; takes as an argument either an image or batch with latent space images"""
@@ -755,13 +812,15 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
 
         self.sampler = sd_samplers.create_sampler(self.sampler_name, self.sd_model)
 
+        samples = samples[:, :, self.truncate_y//2:samples.shape[2]-(self.truncate_y+1)//2, self.truncate_x//2:samples.shape[3]-(self.truncate_x+1)//2]
+
         noise = create_random_tensors(samples.shape[1:], seeds=seeds, subseeds=subseeds, subseed_strength=subseed_strength, p=self)
 
         # GC now before running the next img2img to prevent running out of memory
         x = None
         devices.torch_gc()
 
-        samples = self.sampler.sample_img2img(self, samples, noise, conditioning, unconditional_conditioning, steps=self.steps, image_conditioning=image_conditioning)
+        samples = self.sampler.sample_img2img(self, samples, noise, conditioning, unconditional_conditioning, steps=self.hr_second_pass_steps or self.steps, image_conditioning=image_conditioning)
 
         return samples
 

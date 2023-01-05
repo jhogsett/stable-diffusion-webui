@@ -560,7 +560,7 @@ Requested path was: {f}
             generation_info = None
             with gr.Column():
                 with gr.Row(elem_id=f"image_buttons_{tabname}"):
-                    open_folder_button = gr.Button(folder_symbol, elem_id="hidden_element" if shared.cmd_opts.hide_ui_dir_config else 'open_folder')
+                    open_folder_button = gr.Button(folder_symbol, elem_id="hidden_element" if shared.cmd_opts.hide_ui_dir_config else f'open_folder_{tabname}')
 
                     if tabname != "extras":
                         save = gr.Button('Save', elem_id=f'save_{tabname}')
@@ -576,13 +576,13 @@ Requested path was: {f}
 
                 if tabname != "extras":
                     with gr.Row():
-                        download_files = gr.File(None, file_count="multiple", interactive=False, show_label=False, visible=False)
+                        download_files = gr.File(None, file_count="multiple", interactive=False, show_label=False, visible=False, elem_id=f'download_files_{tabname}')
 
                     with gr.Group():
-                        html_info = gr.HTML()
-                        html_log = gr.HTML()
+                        html_info = gr.HTML(elem_id=f'html_info_{tabname}')
+                        html_log = gr.HTML(elem_id=f'html_log_{tabname}')
 
-                        generation_info = gr.Textbox(visible=False)
+                        generation_info = gr.Textbox(visible=False, elem_id=f'generation_info_{tabname}')
                         if tabname == 'txt2img' or tabname == 'img2img':
                             generation_info_button = gr.Button(visible=False, elem_id=f"{tabname}_generation_info_button")
                             generation_info_button.click(
@@ -624,9 +624,9 @@ Requested path was: {f}
                         )
 
                 else:
-                    html_info_x = gr.HTML()
-                    html_info = gr.HTML()
-                    html_log = gr.HTML()
+                    html_info_x = gr.HTML(elem_id=f'html_info_x_{tabname}')
+                    html_info = gr.HTML(elem_id=f'html_info_{tabname}')
+                    html_log = gr.HTML(elem_id=f'html_log_{tabname}')
 
                 parameters_copypaste.bind_buttons(buttons, result_gallery, "txt2img" if tabname == "txt2img" else None)
                 return result_gallery, generation_info if tabname != "extras" else html_info_x, html_info, html_log
@@ -637,10 +637,10 @@ def create_sampler_and_steps_selection(choices, tabname):
         with FormRow(elem_id=f"sampler_selection_{tabname}"):
             sampler_index = gr.Dropdown(label='Sampling method', elem_id=f"{tabname}_sampling", choices=[x.name for x in choices], value=choices[0].name, type="index")
             sampler_index.save_to_config = True
-            steps = gr.Slider(minimum=1, maximum=150, step=1, elem_id=f"{tabname}_steps", label="Sampling Steps", value=20)
+            steps = gr.Slider(minimum=1, maximum=150, step=1, elem_id=f"{tabname}_steps", label="Sampling steps", value=20)
     else:
         with FormGroup(elem_id=f"sampler_selection_{tabname}"):
-            steps = gr.Slider(minimum=1, maximum=150, step=1, elem_id=f"{tabname}_steps", label="Sampling Steps", value=20)
+            steps = gr.Slider(minimum=1, maximum=150, step=1, elem_id=f"{tabname}_steps", label="Sampling steps", value=20)
             sampler_index = gr.Radio(label='Sampling method', elem_id=f"{tabname}_sampling", choices=[x.name for x in choices], value=choices[0].name, type="index")
 
     return steps, sampler_index
@@ -709,10 +709,16 @@ def create_ui():
                             enable_hr = gr.Checkbox(label='Hires. fix', value=False, elem_id="txt2img_enable_hr")
 
                     elif category == "hires_fix":
-                        with FormRow(visible=False, elem_id="txt2img_hires_fix") as hr_options:
-                            hr_upscaler = gr.Dropdown(label="Upscaler", elem_id="txt2img_hr_upscaler", choices=[*shared.latent_upscale_modes, *[x.name for x in shared.sd_upscalers]], value=shared.latent_upscale_default_mode)
-                            hr_scale = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Upscale by", value=2.0, elem_id="txt2img_hr_scale")
-                            denoising_strength = gr.Slider(minimum=0.0, maximum=1.0, step=0.01, label='Denoising strength', value=0.7, elem_id="txt2img_denoising_strength")
+                        with FormGroup(visible=False, elem_id="txt2img_hires_fix") as hr_options:
+                            with FormRow(elem_id="txt2img_hires_fix_row1"):
+                                hr_upscaler = gr.Dropdown(label="Upscaler", elem_id="txt2img_hr_upscaler", choices=[*shared.latent_upscale_modes, *[x.name for x in shared.sd_upscalers]], value=shared.latent_upscale_default_mode)
+                                hr_second_pass_steps = gr.Slider(minimum=0, maximum=150, step=1, label='Hires steps', value=0, elem_id="txt2img_hires_steps")
+                                denoising_strength = gr.Slider(minimum=0.0, maximum=1.0, step=0.01, label='Denoising strength', value=0.7, elem_id="txt2img_denoising_strength")
+
+                            with FormRow(elem_id="txt2img_hires_fix_row2"):
+                                hr_scale = gr.Slider(minimum=1.0, maximum=4.0, step=0.05, label="Upscale by", value=2.0, elem_id="txt2img_hr_scale")
+                                hr_resize_x = gr.Slider(minimum=0, maximum=2048, step=8, label="Resize width to", value=0, elem_id="txt2img_hr_resize_x")
+                                hr_resize_y = gr.Slider(minimum=0, maximum=2048, step=8, label="Resize height to", value=0, elem_id="txt2img_hr_resize_y")
 
                     elif category == "batch":
                         if not opts.dimensions_and_batch_together:
@@ -753,6 +759,9 @@ def create_ui():
                     denoising_strength,
                     hr_scale,
                     hr_upscaler,
+                    hr_second_pass_steps,
+                    hr_resize_x,
+                    hr_resize_y,
                 ] + custom_inputs,
 
                 outputs=[
@@ -804,6 +813,9 @@ def create_ui():
                 (hr_options, lambda d: gr.Row.update(visible="Denoising strength" in d)),
                 (hr_scale, "Hires upscale"),
                 (hr_upscaler, "Hires upscaler"),
+                (hr_second_pass_steps, "Hires steps"),
+                (hr_resize_x, "Hires resize-1"),
+                (hr_resize_y, "Hires resize-2"),
                 *modules.scripts.scripts_txt2img.infotext_fields
             ]
             parameters_copypaste.add_paste_fields("txt2img", None, txt2img_paste_fields)
@@ -1684,7 +1696,9 @@ def create_ui():
 
         if os.path.exists("html/footer.html"):
             with open("html/footer.html", encoding="utf8") as file:
-                gr.HTML(file.read(), elem_id="footer")
+                footer = file.read()
+                footer = footer.format(versions=versions_html())
+                gr.HTML(footer, elem_id="footer")
 
         text_settings = gr.Textbox(elem_id="settings_json", value=lambda: opts.dumpjson(), visible=False)
         settings_submit.click(
@@ -1845,3 +1859,30 @@ def reload_javascript():
 
 if not hasattr(shared, 'GradioTemplateResponseOriginal'):
     shared.GradioTemplateResponseOriginal = gradio.routes.templates.TemplateResponse
+
+
+def versions_html():
+    import torch
+    import launch
+
+    python_version = ".".join([str(x) for x in sys.version_info[0:3]])
+    commit = launch.commit_hash()
+    short_commit = commit[0:8]
+
+    if shared.xformers_available:
+        import xformers
+        xformers_version = xformers.__version__
+    else:
+        xformers_version = "N/A"
+
+    return f"""
+python: <span title="{sys.version}">{python_version}</span>
+ • 
+torch: {torch.__version__}
+ • 
+xformers: {xformers_version}
+ • 
+gradio: {gr.__version__}
+ • 
+commit: <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/{commit}">{short_commit}</a>
+"""
