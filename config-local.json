@@ -129,4 +129,5 @@
     "samplers_in_dropdown": true,
     "dimensions_and_batch_together": true,
     "ui_reorder": "sampler, dimensions, cfg, seed, checkboxes, hires_fix, batch, scripts",
+    "always_discard_next_to_last_sigma": false
 }
