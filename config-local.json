@@ -128,5 +128,5 @@
     "use_old_karras_scheduler_sigmas": false,
     "samplers_in_dropdown": true,
     "dimensions_and_batch_together": true,
-    "ui_reorder": "sampler, dimensions, cfg, seed, checkboxes, hires_fix, batch, scripts"
+    "ui_reorder": "sampler, dimensions, cfg, seed, checkboxes, hires_fix, batch, scripts",
 }
