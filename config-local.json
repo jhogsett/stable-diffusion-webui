@@ -57,7 +57,7 @@
     "training_xattention_optimizations": false,
     "sd_model_checkpoint": "model.ckpt [81761151]",
     "sd_checkpoint_cache": 1,
-    "sd_vae": "auto",
+    "sd_vae": "Automatic",
     "sd_vae_as_default": false,
     "sd_hypernetwork": "None",
     "sd_hypernetwork_strength": 1.0,
