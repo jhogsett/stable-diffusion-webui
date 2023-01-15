@@ -55,7 +55,7 @@
     "training_image_repeats_per_epoch": 1,
     "training_write_csv_every": 500,
     "training_xattention_optimizations": false,
-    "sd_model_checkpoint": "model.ckpt [81761151]",
+    "sd_model_checkpoint": "v1-5-pruned-emaonly.ckpt",
     "sd_checkpoint_cache": 1,
     "sd_vae": "Automatic",
     "sd_vae_as_default": false,
@@ -130,5 +130,14 @@
     "dimensions_and_batch_together": true,
     "ui_reorder": "sampler, dimensions, cfg, seed, checkboxes, hires_fix, batch, scripts",
     "always_discard_next_to_last_sigma": false,
-    "save_training_settings_to_txt": true
+    "save_training_settings_to_txt": true,
+    "sd_checkpoint_hash": "cc6cb27103417325ff94f52b7a5d2dde45a7515b25c255d8e396c90014281516",
+    "print_hypernet_extra": false,
+    "training_enable_tensorboard": false,
+    "training_tensorboard_save_images": false,
+    "training_tensorboard_flush_every": 120.0,
+    "use_old_hires_fix_width_height": false,
+    "live_previews_enable": true,
+    "live_preview_content": "Combined",
+    "live_preview_refresh_period": 1000.0
 }
