@@ -55,7 +55,7 @@
     "training_image_repeats_per_epoch": 1,
     "training_write_csv_every": 500,
     "training_xattention_optimizations": false,
-    "sd_model_checkpoint": "v1-5-pruned-emaonly.ckpt",
+    "sd_model_checkpoint": "model.ckpt [cc6cb27103]",
     "sd_checkpoint_cache": 1,
     "sd_vae": "Automatic",
     "sd_vae_as_default": false,
