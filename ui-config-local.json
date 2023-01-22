@@ -348,7 +348,7 @@
     "extras/Upscaler 2 visibility/visible": true,
     "extras/Upscaler 2 visibility/value": 1,
     "extras/Upscaler 2 visibility/minimum": 0.0,
-    "extras/Upscaler 2 visibility/maximum": 0.0,
+    "extras/Upscaler 2 visibility/maximum": 1.0,
     "extras/Upscaler 2 visibility/step": 0.001,
     "extras/GFPGAN visibility/visible": true,
     "extras/GFPGAN visibility/value": 0,
