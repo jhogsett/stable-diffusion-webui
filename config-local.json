@@ -139,5 +139,16 @@
     "use_old_hires_fix_width_height": false,
     "live_previews_enable": true,
     "live_preview_content": "Combined",
-    "live_preview_refresh_period": 1000.0
+    "live_preview_refresh_period": 1000.0,
+    "show_warnings": false,
+    "extra_networks_default_multiplier": 1,
+    "upcast_attn": false,
+    "interrogate_clip_skip_categories": [],
+    "extra_networks_default_view": "cards",
+    "lora_apply_to_outputs": false,
+    "keyedit_precision_attention": 0.1,
+    "keyedit_precision_extra": 0.05,
+    "ui_extra_networks_tab_reorder": "",
+    "postprocessing_scipts_order": "upscale, gfpgan, codeformer",
+    "upscaling_max_images_in_cache": 5
 }
