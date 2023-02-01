@@ -150,5 +150,8 @@
     "keyedit_precision_extra": 0.05,
     "ui_extra_networks_tab_reorder": "",
     "postprocessing_scipts_order": "upscale, gfpgan, codeformer",
-    "upscaling_max_images_in_cache": 5
+    "upscaling_max_images_in_cache": 5,
+    "sd_lora": "None",
+    "postprocessing_enable_in_main_ui": [],
+    "postprocessing_operation_order": []
 }
