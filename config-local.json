@@ -107,9 +107,7 @@
     "s_tmin": 0.0,
     "s_noise": 1.0,
     "eta_noise_seed_delta": 0,
-    "disabled_extensions": [
-        "depthmap2mask"
-    ],
+    "disabled_extensions": [],
     "ldsr_steps": 100,
     "ldsr_cached": false,
     "SWIN_tile": 192,
