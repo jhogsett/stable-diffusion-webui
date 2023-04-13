@@ -774,5 +774,12 @@
     "customscript/xyz_grid.py/img2img/Grid margins (px)/maximum": 500,
     "customscript/xyz_grid.py/img2img/Grid margins (px)/step": 2,
     "train/Use PNG alpha channel as loss weight/visible": true,
-    "train/Use PNG alpha channel as loss weight/value": false
+    "train/Use PNG alpha channel as loss weight/value": false,
+    "customscript/loopback.py/img2img/Final denoising strength/visible": true,
+    "customscript/loopback.py/img2img/Final denoising strength/value": 0.5,
+    "customscript/loopback.py/img2img/Final denoising strength/minimum": 0,
+    "customscript/loopback.py/img2img/Final denoising strength/maximum": 1,
+    "customscript/loopback.py/img2img/Final denoising strength/step": 0.01,
+    "customscript/loopback.py/img2img/Denoising strength curve/visible": true,
+    "customscript/loopback.py/img2img/Denoising strength curve/value": "Linear"
 }
