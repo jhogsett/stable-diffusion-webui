@@ -184,5 +184,10 @@
     "uni_pc_lower_order_final": true,
     "aesthetic_scorer_enabled": true,
     "aesthetic_scorer_clip_model": "ViT-L/14",
-    "disable_all_extensions": "none"
+    "disable_all_extensions": "none",
+    "quicksettings_list": [
+        "sd_model_checkpoint",
+        "save_txt",
+        "save_images_before_highres_fix"
+    ]
 }
