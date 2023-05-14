@@ -159,7 +159,7 @@
     "img2img/Sampling steps/value": 50,
     "img2img/Sampling steps/minimum": 1,
     "img2img/Sampling steps/maximum": 150,
-    "img2img/Sampling steps/step": 5,
+    "img2img/Sampling steps/step": 1,
     "img2img/Sampling method/visible": true,
     "img2img/Sampling method/value": "Euler a",
     "img2img/Width/visible": true,
