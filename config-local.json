@@ -189,5 +189,10 @@
         "sd_model_checkpoint",
         "save_txt",
         "save_images_before_highres_fix"
-    ]
+    ],
+    "lora_functional": false,
+    "lora_preferred_name": "Alias from file",
+    "js_modal_lightbox_gamepad": true,
+    "js_modal_lightbox_gamepad_repeat": 250.0,
+    "add_version_to_infotext": true
 }
