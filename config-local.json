@@ -207,5 +207,38 @@
     "ui_tab_order": [],
     "hires_fix_show_sampler": false,
     "hires_fix_show_prompts": true,
-    "live_previews_image_format": "png"
+    "live_previews_image_format": "png",
+    "ui_reorder_list": [
+        "sampler",
+        "dimensions",
+        "cfg",
+        "seed",
+        "checkboxes",
+        "hires_fix",
+        "batch",
+        "scripts"
+    ],
+    "grid_zip_filename_pattern": "",
+    "sd_unet": "Automatic",
+    "pad_cond_uncond": false,
+    "experimental_persistent_cond_cache": false,
+    "hires_fix_use_firstpass_conds": false,
+    "disable_token_counters": false,
+    "extra_options": [],
+    "extra_options_accordion": false,
+    "infotext_styles": "Apply if any",
+    "k_sched_type": "Automatic",
+    "sigma_min": 0.0,
+    "sigma_max": 0.0,
+    "rho": 0.0,
+    "canvas_hotkey_zoom": "Alt",
+    "canvas_hotkey_adjust": "Ctrl",
+    "canvas_hotkey_move": "F",
+    "canvas_hotkey_fullscreen": "S",
+    "canvas_hotkey_reset": "R",
+    "canvas_hotkey_overlap": "O",
+    "canvas_show_tooltip": true,
+    "canvas_disabled_functions": [
+        "Overlap"
+    ]
 }

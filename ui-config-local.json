@@ -931,5 +931,11 @@
     "txt2img/Hires prompt/visible": true,
     "txt2img/Hires prompt/value": "",
     "txt2img/Hires negative prompt/visible": true,
-    "txt2img/Hires negative prompt/value": ""
+    "txt2img/Hires negative prompt/value": "",
+    "txt2img/\u2195\ufe0f/visible": true,
+    "txt2img/Save & Restart/visible": true,
+    "txt2img/Open.../visible": true,
+    "img2img/\u2195\ufe0f/visible": true,
+    "img2img/Save & Restart/visible": true,
+    "img2img/Open.../visible": true
 }
